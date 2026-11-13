@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-time 2FA code — Wantrelaxx</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            text-align: center;
+            background: #000000;
+            color: #ffffff;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 30px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #label {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        #code {
+            font-size: 5.5rem;
+            font-weight: bold;
+            letter-spacing: 12px;
+            margin: 40px 0 30px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8),
+                         0 0 60px rgba(255, 255, 255, 0.4);
+            min-height: 80px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.8),
+                             0 0 60px rgba(255, 255, 255, 0.4);
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(255, 255, 255, 1),
+                             0 0 80px rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        #countdown {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .progress {
+            height: 8px;
+            background: #222222;
+            margin: 20px auto;
+            width: 320px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #cccccc);
+            transition: width 1s linear;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        #copy-btn {
+            margin-top: 20px;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background-color: #ffffff;
+            color: #000000;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+            letter-spacing: 1px;
+        }
+
+        #copy-btn:hover {
+            background-color: transparent;
+            color: #ffffff;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        #copy-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes buttonIntro {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #copy-btn {
+            animation: buttonIntro 0.5s ease-out;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+
+        .success {
+            color: #51cf66;
+            margin-top: 10px;
+            font-size: 1rem;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>One-time 2FA code</h1>
+        <div id="label">Wantrelaxx - fanpay</div>
+        <div id="code">------</div>
+        <div class="progress"><div id="bar" class="bar" style="width:100%"></div></div>
+        <div id="countdown">Update in <span id="time">30</span>s</div>
+        <button id="copy-btn">Copy</button>
+        <div id="error" class="error"></div>
+        <div id="success" class="success"></div>
+    </div>
+
+    <script>
+        // ==================== SETTINGS ====================
+        const secretBase32 = 'ES5CGSUSFP27XJ2ALM35KGCAYI76RG2N';   // ← Replace with your 2FA secret
+        const labelText = 'Wantrelaxx - fanpay';
+        // =================================================
+
+        document.getElementById('copy-btn').addEventListener('click', async () => {
+            const text = document.getElementById('code').textContent;
+            if (text === '------') {
+                showError('Code not ready yet!');
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                showSuccess('Code copied!');
+                document.getElementById('copy-btn').textContent = 'Copied!';
+                setTimeout(() => {
+                    document.getElementById('copy-btn').textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                console.log(err);
+                showError('Error copying code');
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            setTimeout(() => {
+                errorDiv.textContent = '';
+            }, 3000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            setTimeout(() => {
+                successDiv.textContent = '';
+            }, 2000);
+        }
+
+        function base32ToBuffer(base32) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            let bits = '';
+            for (let i = 0; i < base32.length; i++) {
+                const val = alphabet.indexOf(base32[i].toUpperCase());
+                if (val === -1) continue;
+                bits += val.toString(2).padStart(5, '0');
+            }
+            const bytes = new Uint8Array(Math.floor(bits.length / 8));
+            for (let i = 0; i < bytes.length; i++) {
+                bytes[i] = parseInt(bits.substr(i * 8, 8), 2);
+            }
+            return bytes;
+        }
+
+        function generateTOTP(secretBase32) {
+            const key = base32ToBuffer(secretBase32);
+            const epoch = Math.floor(Date.now() / 1000);
+            const counter = Math.floor(epoch / 30);
+
+            // Big-endian 8-byte counter
+            const counterBuffer = new ArrayBuffer(8);
+            const view = new DataView(counterBuffer);
+            view.setBigUint64(0, BigInt(counter), false);
+
+            // HMAC-SHA1
+            const cryptoKey = crypto.subtle.importKey(
+                "raw", key, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
+            );
+
+            return cryptoKey.then(key => {
+                return crypto.subtle.sign("HMAC", key, counterBuffer);
+            }).then(hmac => {
+                const hmacArray = new Uint8Array(hmac);
+                const offset = hmacArray[hmacArray.length - 1] & 0x0F;
+                const code = ((hmacArray[offset] & 0x7F) << 24) |
+                    ((hmacArray[offset + 1] & 0xFF) << 16) |
+                    ((hmacArray[offset + 2] & 0xFF) << 8) |
+                    (hmacArray[offset + 3] & 0xFF);
+                return (code % 1000000).toString().padStart(6, '0');
+            });
+        }
+
+        function update() {
+            const now = Math.floor(Date.now() / 1000);
+            const remaining = 30 - (now % 30);
+
+
+            document.getElementById('time').textContent = remaining;
+            document.getElementById('bar').style.width = (remaining / 30 * 100) + '%';
+
+            generateTOTP(secretBase32).then(code => {
+                document.getElementById('code').textContent = code;
+                document.getElementById('error').textContent = '';
+            }).catch(err => {
+                document.getElementById('error').textContent = 'Error: ' + err.message;
+                console.error(err);
+            });
+        }
+
+        window.onload = function() {
+            document.getElementById('label').textContent = labelText;
+            update();
+            setInterval(update, 1000);
+        };
+    </script>
+</body>
+</html>
